@@ -51,9 +51,6 @@ title: Aayush Pantha – Red Team Operator
     {% for post in site.posts limit: 4 %}
       <div class="col-md-6 col-lg-3">
         <div class="card h-100 shadow-sm">
-          {% if post.image %}
-            <img src="{{ post.image }}" class="card-img-top" alt="{{ post.title }}" loading="lazy">
-          {% endif %}
           <div class="card-body">
             <h5 class="card-title"><a href="{{ post.url }}" class="text-decoration-none">{{ post.title }}</a></h5>
             <p class="card-text text-muted small">
