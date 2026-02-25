@@ -5,7 +5,7 @@ categories: [Certifications, Active Directory, Red Teaming]
 tags: [crtp, alter-solutions, active-directory, red-team, pentesting]
 toc: true
 toc_sticky: true
-image: /assets/img/crtp/crtp-journey-banner.jpg   # ← optional: add your own banner/screenshot if you have one
+image: /assets/img/crtp.webp   # ← optional: add your own banner/screenshot if you have one
 ---
 
 # The Road to CRTP – My Personal Journey

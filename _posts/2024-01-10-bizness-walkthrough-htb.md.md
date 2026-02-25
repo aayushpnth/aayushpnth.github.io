@@ -5,7 +5,7 @@ categories: [HackTheBox, Walkthrough, Offensive Security]
 tags: [bizness, ofbiz, rce, apache-ofbiz, privilege-escalation]
 toc: true
 toc_sticky: true
-image: /assets/img/bizness/bizness-htb.jpg   # ← change to your actual banner/screenshot path if you have one
+image: /assets/img/bizz.webp   # ← change to your actual banner/screenshot path if you have one
 ---
 
 # Bizness Walkthrough | HTB
