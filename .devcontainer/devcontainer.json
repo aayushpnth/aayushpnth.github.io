@@ -1,4 +1,26 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+{
+  "name": "Chirpy Jekyll",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/ruby:1": {
+      "version": "latest"
+    }
+  },
+  "postCreateCommand": "bundle install",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rebornix.ruby",
+        "Shopify.ruby-lsp",
+        "dbaeumer.vscode-eslint"
+      ]
+    }
+  },
+  "forwardPorts": [4000],
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspaces/aayushpnth.github.io,type=bind,consistency=cached"
+  ]
+}// For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/alpine
 {
 	"name": "Alpine",

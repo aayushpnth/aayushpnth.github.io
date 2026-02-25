@@ -5,7 +5,7 @@ permalink: /about/
 ---
 
 # AAYUSH PANTHA  
-**Blue Teamer Turned Red Teamer**  
+**The Blue Teamer's Red Teamer**  
 **CRTP | Comptia Pentest+ | ACP | CASA**  
 
 aayushpantha97@gmail.com  
