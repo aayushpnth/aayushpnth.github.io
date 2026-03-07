@@ -8,92 +8,87 @@ toc_sticky: true
 image: /assets/img/crtp.webp   # ← optional: add your own banner/screenshot if you have one
 ---
 
-# The Road to CRTP – My Personal Journey
+# The Road to CRTP: My Personal Journey 🚀
 
-## Introduction
+An in-depth look at my experience pursuing and clearing the **Certified Red Team Professional (CRTP)** certification by Altered Security.
 
-After months of grinding, late nights, coffee-fueled debugging sessions, and countless failed privilege escalations, I finally passed the **Certified Red Team Professional (CRTP)** exam from Alter Solutions.
+---
 
-This certification focuses on **real-world Active Directory exploitation** — no theory fluff, just pure hands-on red team tradecraft inside enterprise Windows environments.
+## 🛡️ What is CRTP?
 
-I want to share my journey: what worked, what wasted my time, the resources I used, the mindset shift I had to make, and tips so you can get there faster.
+The **Certified Red Team Professional (CRTP)** is a hands-on certification designed for security professionals who want to master Active Directory (AD) security. Unlike many other certifications, it isn't about "getting a shell" through unpatched vulnerabilities; it’s about exploiting **misconfigurations** and **architectural flaws** in a fully patched Windows environment.
 
-## Why I Chose CRTP
+### The Course: Attacking and Defending Active Directory
+The training provided by Nikhil Mittal is top-tier. I opted for the **30-day lab access**, which included:
+* **Video Content:** 14+ hours of high-quality instruction.
+* **Lab Environment:** A multi-forest environment with several domains.
+* **Tools:** Heavy focus on PowerShell-based tools (PowerView, Mimikatz, BloodHound).
 
-I already had CompTIA PenTest+, some OSCP prep experience, and a bunch of HTB/TryHackMe boxes under my belt — but I felt stuck when it came to **domain dominance**.
+---
 
-Most certifications teach isolated vulns or web/app pentesting. CRTP is different: it forces you to think like an APT inside a full corporate AD forest.
+## 📝 My Preparation & Learning Path
 
-- Realistic AD lab (multiple domains, trusts, misconfigs)
-- No multiple-choice bullshit — pure practical exam
-- Covers the exact TTPs real red teams use daily
+One mistake I made was activating the lab *before* finishing the videos. **Don't do this.** Finish the PDFs and videos first so you can hit the ground running the moment your lab timer starts.
 
-If you want to go from "I can pop a user" → "I own the entire domain", CRTP is the bridge.
+### Phase 1: Enumeration (The Key to Success)
+Active Directory is all about information. I spent a significant amount of time learning how to map out the network without being "loud."
+* **PowerView:** The bread and butter of the course. Understanding `Get-DomainUser`, `Get-NetLocalGroup`, and `Get-NetComputer`.
+* **BloodHound:** Using the SharpHound collector to visualize attack paths. It’s a game-changer for finding hidden relationships.
 
-## My Preparation Timeline (3–4 Months)
+### Phase 2: Exploitation & Lateral Movement
+I focused heavily on the following techniques:
+* **Local Privilege Escalation:** Finding misconfigured services or stored credentials.
+* **Kerberoasting & AS-REP Roasting:** Targeting service accounts.
+* **Delegation Attacks:** Understanding Unconstrained, Constrained, and Resource-Based Constrained Delegation (RBCD).
+* **Mimikatz:** Using `sekurlsa::logonpasswords` and `lsadump::lsa` to extract secrets.
 
-**Month 1 – Building Foundations**  
-- Completed all **TryHackMe AD rooms** (especially Breaching AD, Attacking Kerberos, Exploiting Active Directory)  
-- Did **HackTheBox Academy** AD module (free tier + some paid)  
-- Watched IppSec’s AD playlist on YouTube (gold)  
-- Read the **Red Team Notes** AD section[](https://book.hacktricks.xyz/windows-hardening/active-directory-methodology)
+### Phase 3: Domain Dominance & Persistence
+Once you hit Domain Admin, the work isn't done. I practiced:
+* **Golden/Silver Tickets:** For long-term access.
+* **Skeleton Key:** A more advanced persistence method.
+* **DCSync:** Pulling hashes directly from the Domain Controller.
 
-**Month 2 – Deep Dive & Tool Mastery**  
-- Went through **CRTP official labs** (provided after purchase) — the best part  
-- Mastered:  
-  - BloodHound (attack path visualization)  
-  - PowerView / SharpHound  
-  - Rubeus (Kerberoasting, AS-REP roasting, ticket forging)  
-  - Mimikatz (DCSync, Golden/Silver tickets)  
-  - Impacket suite (ntlmrelayx, secretsdump, psexec)  
-  - CrackMapExec (mass spraying, module execution)  
-- Practiced lateral movement, delegation abuse, AD CS exploits
+---
 
-**Month 3 – Practice & Mock Exams**  
-- Repeated CRTP labs 3–4 times, trying different paths  
-- Did **Altered Security’s CRTP-like challenges**  
-- Watched **RastaMouse** and **Harmj0y** talks on AD attacks  
-- Built my own AD lab with VirtualBox / VMware (DC + 2 workstations + trusts)  
-- Failed the exam once → analyzed weak areas (Kerberos delegation & AD CS were my killers)
+## 💻 The Exam Experience
 
-**Final 2 Weeks – Exam Prep**  
-- Made cheat sheets for every attack vector  
-- Timed myself on full lab runs (under 8 hours)  
-- Focused on enumeration → path finding → execution speed
+The exam is a **24-hour** practical challenge followed by **48 hours** for report writing. You are tasked with compromising 5 target machines.
 
-## Resources I Actually Used (No Fluff)
+* **9:00 AM:** Started the exam. The environment took about 15 minutes to initialize.
+* **The Strategy:** I treated it like a real assessment. I enumerated everything first before attempting any exploits.
+* **The "Wall":** Around the 4-hour mark, I hit a rabbit hole. I took a lunch break, stepped away from the screen, and the solution came to me immediately upon returning.
+* **5:00 PM:** I successfully compromised all target machines and had all the necessary screenshots for my report.
 
-- **Official CRTP labs** (Alter Solutions) → worth every penny
-- TryHackMe: Breaching AD, Attacking Kerberos, Exploiting Active Directory
-- HackTheBox Academy: Active Directory module
-- Book: Red Team Notes (hacktricks.xyz)
-- YouTube: IppSec AD playlist, RastaMouse talks
-- Tools: BloodHound, Rubeus, Mimikatz, Impacket, CrackMapExec
-- Blog: https://posts.specterops.io (Harmj0y, SpecterOps team)
-- GitHub: https://github.com/S3cur3Th1sSh1t/WinPwnage (great reference)
+> **Important Note:** You don't need to be a "god-tier" hacker to pass. You need to be **methodical**. If a command doesn't work, check your syntax, check your privileges, and check the environment.
 
-## Exam Day Experience
+---
 
-- 48-hour practical exam + 24-hour report window
-- Full AD forest with multiple misconfigs
-- Goal: domain admin + proof of compromise
-- I finished in ~12 hours (including breaks)
-- Report: screenshots, commands, explanations — keep it clear & structured
+## 💡 Top Tips for Aspirants
 
-Passed on second attempt.
+### 1. Master the Lab Manual
+If it's in the lab manual, it (or a variation of it) can be on the exam. Do the lab exercises multiple times until the commands become muscle memory.
 
-## Tips for Success
+### 2. Build a Solid Cheat Sheet
+Organize your commands by category:
+* **Enumeration** (User, Group, Trust)
+* **PrivEsc** (Local, Domain)
+* **Lateral Movement** (Overpass-the-hash, PSSession)
+* **Forest/Trust Attacks**
 
-1. **Enumerate relentlessly** — never skip BloodHound/SharpHound
-2. **Understand delegation** — unconstrained/constrained/resource-based is huge
-3. **Practice ticket attacks** — Kerberoast, AS-REP roast, overpass-the-hash, golden/silver tickets
-4. **Learn AD CS** — it’s a goldmine for priv esc
-5. **Time yourself** — speed matters in real engagements too
-6. **Take notes** — one big markdown file with commands & explanations
-7. **Don’t panic on failure** — first fail taught me more than any course
+### 3. Take Quality Screenshots
+Nothing is worse than finishing an exam and realizing you forgot to screenshot the `whoami` or `hostname` output for a specific machine. Document as you go!
 
-## Final Thoughts
+### 4. Health & Mental State
+* **Breaks are mandatory:** Your brain stops seeing obvious things after 3 hours of staring at a terminal.
+* **Hydration:** Keep water nearby.
+* **Sleep:** If you're stuck at 2:00 AM, go to sleep. You'll likely solve it in 10 minutes at 8:00 AM.
 
+---
+
+## 🏁 Final Thoughts
+The CRTP is easily one of the most fun and practical certifications I've taken. It moved me away from "script kiddie" exploitation and toward a deep, structural understanding of how Windows networks actually function.
+
+**Good luck on your journey to becoming a Red Teamer!**
 CRTP isn’t just another cert — it’s the certification that finally made me feel confident attacking enterprise AD environments.
 
 If you’re serious about red teaming, stop wasting time on easy boxes and go for it.
