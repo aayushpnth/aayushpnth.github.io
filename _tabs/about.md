@@ -9,7 +9,7 @@ permalink: /about/
 **CRTP | Comptia Pentest+ | ACP | CASA**  
 
 aayushpantha97@gmail.com  
-Kathmandu, Nepal  
+Kathmandu, Nepal 
 
 ### PROFESSIONAL SUMMARY  
 Mid-level Security Researcher at SecureIQLab, specializing in independent, adversarial validation of next-generation enterprise security products for global leaders including Google, Palo Alto Networks, Cloudflare, AWS, Imperva, F5, Fortinet, Netskope, Akamai, Sophos, Forcepoint, Barracuda, and others.
