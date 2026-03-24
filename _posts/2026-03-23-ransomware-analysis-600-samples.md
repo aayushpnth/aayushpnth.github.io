@@ -9,7 +9,7 @@ toc: true
 ![Ransomware Header Image](/assets/img/ransomware.jpeg){: .rounded-10 .shadow .w-100 }
 *Modern ransomware is far more than just an encryptor — it’s a full-spectrum attack platform.*
 
-**Author:** [Aayush Pantha / lucy01]  
+**Author:** Aayush Pantha@lucy01 
 **Role:** Cybersecurity Researcher & Red Team Operator  
 **Date:** March 2026  
 
@@ -25,7 +25,7 @@ This is **Part 1** of a two-part series. Here I detail the unexpected behaviors 
 
 - **Volume:** 600+ unique samples  
 - **Families covered (partial list):** LockBit (3.0 & 4.0), Akira, Cl0p, REvil (Sodinokibi), Conti, Ryuk, BlackBasta, BlackMatter, DarkSide, Maze, Hive, Medusa, BianLian, Qilin, Rhysida, Avaddon, Nefilim, Pysa/Mespinoza, HelloKitty (Vice Society overlap), Trigona, RA World (formerly RA Group), BlackCat (ALPHV), Ragnar Locker, and dozens more.  
-- **Average samples per family:** ~10  
+- **Average samples per family:** 10  
 - **Sources:** ANY.RUN threat intelligence platform, MalwareBazaar, VX-Underground archive, public GitHub repositories, and limited private feeds.  
 - **Analysis environment:** Physical hardware + isolated virtual machines. Cloud-based sandboxes were deliberately avoided after early failures.  
 - **Testing objective:** Execute samples and record every pre-encryption, encryption, and post-encryption behavior while monitoring EPP/EDR telemetry.
@@ -43,7 +43,7 @@ A surprising number of families include sophisticated checks to detect virtual m
 
 - **BlackCat (ALPHV)** and **Ragnar Locker** were the most aggressive against VirtualBox. They inspected registry keys (e.g., `HKLM\SOFTWARE\Oracle\VirtualBox Guest Additions`), running processes (`vboxsvc.exe`, `VBoxTray.exe`), MAC address OUIs, CPUID leaf values, and hardware artifacts.
 - **Four samples** specifically detected cloud environments (AWS, Azure, GCP). Detection methods included querying instance metadata endpoints (`169.254.169.254`) and checking for cloud-specific drivers or processes.
-- **Behavior on detection:** These samples **refused to execute entirely** — no encryption, no ransom note, no artifacts left behind. I had to migrate analysis to bare-metal physical desktops to continue.
+- **Behavior on detection:** These samples **refused to execute entirely** no encryption, no ransom note, no artifacts left behind. I had to migrate analysis to bare-metal physical desktops to continue.
 
 **Defender takeaway:** If your sandbox or analysis environment is cloud-hosted or uses common VM fingerprints, you are effectively blind to a non-trivial percentage of modern ransomware.
 
@@ -101,7 +101,7 @@ These tactics dramatically increase the difficulty of both automated detection a
 
 Ransomware in 2026 is no longer a simple encryptor.
 
-> “Ransomware doesn’t only encrypt files — it corrupts bootloaders, creates file copies for persistence, communicates with C2 servers, implants keystroke loggers, changes wallpapers, steals credentials, hijacks the entire screen, and deploys psychological warfare tactics.”
+> “Ransomware doesn’t only encrypt files, it corrupts bootloaders, creates file copies for persistence, communicates with C2 servers, implants keystroke loggers, changes wallpapers, steals credentials, hijacks the entire screen, and deploys psychological warfare tactics.”
 
 The encryption step is now just the **final visible stage** of a much larger, multi-purpose infection chain.
 
@@ -109,7 +109,13 @@ Most organizations and even many security products still focus almost exclusivel
 
 ### Coming in Part 2
 
-I will walk through the custom ransomware I developed during this research — including the exact evasion techniques that successfully bypassed multiple commercial EDR/AV/XDR solutions — and what real-world lessons I learned about modern detection gaps.
+I will walk through the custom ransomware I developed during this research, including the exact evasion techniques that successfully bypassed multiple commercial EDR/AV/XDR solutions — and what real-world lessons I learned about modern detection gaps.
+
+**Connect me on:**
+
+**Linkedin**: [https://www.linkedin.com/in/aayushpantha/](https://www.linkedin.com/in/aayushpantha/)  
+**Twitter**: [https://x.com/aayushpantha01](https://x.com/aayushpantha01)  
+**Medium**: [https://medium.com/@aayushpantha](https://medium.com/@aayushpantha)
 
 **Stay tuned.**
 
