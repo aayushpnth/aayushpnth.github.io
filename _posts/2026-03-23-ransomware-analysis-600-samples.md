@@ -9,7 +9,7 @@ image:
   alt: Dark cybersecurity ransomware analysis lab with encrypted files and threat intelligence overlays
 ---
 
-![Ransomware Header Image](/assets/img/ransonware.jpeg){: .rounded-10 .shadow .w-100 }
+![Ransomware Header Image](/assets/img/ransomware.jpeg){: .rounded-10 .shadow .w-100 }
 *Modern ransomware is far more than just an encryptor — it’s a full-spectrum attack platform.*
 
 **Author:** [Aayush Pantha / lucy01]  
