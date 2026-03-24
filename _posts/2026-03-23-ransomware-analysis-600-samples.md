@@ -4,9 +4,6 @@ date: 2026-03-24 22:30:00 +0545
 categories: [Cybersecurity, Malware-Analysis, Red-Teaming]
 tags: [ransomware, EDR, endpoint-protection, malware-analysis, threat-research, anti-analysis, data-exfiltration]
 toc: true
-image:
-  path: /assets/img/ransomware.jpeg
-  alt: Dark cybersecurity ransomware analysis lab with encrypted files and threat intelligence overlays
 ---
 
 ![Ransomware Header Image](/assets/img/ransomware.jpeg){: .rounded-10 .shadow .w-100 }
