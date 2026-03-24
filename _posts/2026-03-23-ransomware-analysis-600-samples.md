@@ -120,3 +120,5 @@ I will walk through the custom ransomware I developed during this research, incl
 **Stay tuned.**
 
 ---
+
+#Ransomware #Cybersecurity #MalwareAnalysis #RedTeaming #EndpointSecurity
