@@ -1,155 +1,122 @@
 ---
-title: "I Analyzed 600+ Real Ransomware Samples from the Wild — What They Do Beyond Just Encrypting Files"
-date: 2026-03-23 09:00:00 +0000
-categories: [cybersecurity, malware-analysis, threat-research]
-tags: [ransomware, reverse-engineering, edr, endpoint-protection, malware]
-pin: true
+title: "I Analyzed Over 600 Real-World Ransomware Samples from the Wild – What They Actually Do Beyond File Encryption (Part 1)"
+date: 2026-03-24 22:30:00 +0545
+categories: [Cybersecurity, Malware-Analysis, Red-Teaming]
+tags: [ransomware, EDR, endpoint-protection, malware-analysis, threat-research, anti-analysis, data-exfiltration]
 toc: true
-comments: true
-math: false
-mermaid: false
-img_path: /assets/img/posts/2026-03-23-ransomware/
+image:
+  path: /assets/img/posts/ransomware-part1/header.jpg
+  alt: Dark cybersecurity ransomware analysis lab with encrypted files and threat intelligence overlays
 ---
 
-In early 2026 I spent roughly one full month deeply analyzing over 600 live ransomware samples collected from more than 100 different families.
-The goal of the project was straightforward but aggressive: execute real-world ransomware in controlled environments while closely monitoring and stress-testing a commercial endpoint protection / EDR product.
-Quick Dataset Overview
+![Ransomware Header Image](/assets/img/posts/ransomware-part1/header.jpg){: .rounded-10 .shadow .w-100 }
+*Modern ransomware is far more than just an encryptor — it’s a full-spectrum attack platform.*
 
-Total samples: 600+
-Families covered: 100+ (average ~10 samples per major family)
-Collection period: ~1 month
-Main sources:
-ANY.RUN threat intelligence feeds
-MalwareBazaar
-VX-Underground archive
-Public GitHub repositories
-Limited private intel drops
+**Author:** [Your Name / Alias]  
+**Role:** Cybersecurity Researcher & Red Team Operator  
+**Date:** March 2026  
 
-Notable families (partial list):
-LockBit (3.0 & 4.0 variants)
-Akira
-Cl0p
-REvil / Sodinokibi
-Conti
-Ryuk
-BlackBasta
-BlackMatter
-DarkSide
-Maze
-Hive
-Medusa
-BianLian
-Qilin
-Rhysida
-Avaddon
-Nefilim
-Pysa / Mespinoza
-HelloKitty (Vice Society overlap)
-Trigona
-RA World (formerly RA Group)
-BlackCat / ALPHV
-Ragnar Locker
-…and many more
+### Executive Summary
 
+Between January and February 2026, I conducted an intensive analysis of **more than 600 live ransomware samples** belonging to **over 100 distinct families**. The goal was simple yet brutal: test the real-world effectiveness of a commercial endpoint protection platform (EPP/EDR) by executing samples in controlled environments and observing every stage of the attack chain.
 
-All detonations happened in isolated lab environments (physical hardware was mandatory after early cloud/VM detection failures).
-Key Finding #1 – They Know When You Are Analyzing Them
-A non-trivial number of families embed strong anti-analysis and environment-awareness checks.
-Most aggressive VM detectors:
+What I discovered goes far beyond the classic “encrypt files → drop ransom note” narrative that most defenders still focus on. Modern ransomware operates as a **multi-stage, multi-purpose malware platform** that combines data theft, anti-analysis, system sabotage, persistence, and psychological operations — all before a single file is encrypted.
 
-BlackCat (ALPHV)
-Ragnar Locker
+This is **Part 1** of a two-part series. Here I detail the unexpected behaviors I observed across the dataset. Part 2 will cover how I built my own custom ransomware and successfully evaded multiple commercial security products.
 
-Typical checks observed:
+### Research Methodology & Dataset
 
-Registry artifacts (HKLM\SOFTWARE\Oracle\VirtualBox Guest Additions, etc.)
-Running processes (VBoxService.exe, VBoxTray.exe, etc.)
-MAC address OUI ranges
-CPUID instruction results
-Filesystem / driver fingerprints
+- **Volume:** 600+ unique samples  
+- **Families covered (partial list):** LockBit (3.0 & 4.0), Akira, Cl0p, REvil (Sodinokibi), Conti, Ryuk, BlackBasta, BlackMatter, DarkSide, Maze, Hive, Medusa, BianLian, Qilin, Rhysida, Avaddon, Nefilim, Pysa/Mespinoza, HelloKitty (Vice Society overlap), Trigona, RA World (formerly RA Group), BlackCat (ALPHV), Ragnar Locker, and dozens more.  
+- **Average samples per family:** ~10  
+- **Sources:** ANY.RUN threat intelligence platform, MalwareBazaar, VX-Underground archive, public GitHub repositories, and limited private feeds.  
+- **Analysis environment:** Physical hardware + isolated virtual machines. Cloud-based sandboxes were deliberately avoided after early failures.  
+- **Testing objective:** Execute samples and record every pre-encryption, encryption, and post-encryption behavior while monitoring EPP/EDR telemetry.
 
-Cloud detection:
+All samples were detonated in a controlled lab with proper containment. No production systems were harmed.
 
-~4 samples specifically checked for AWS / Azure / GCP
-Methods: instance metadata service (http://169.254.169.254/), cloud-specific drivers, hostname patterns
-Behavior on detection: complete refusal to proceed — no encryption, no ransom note, no disk writes, silent exit
+![Malware Analysis Lab Setup](/assets/img/posts/ransomware-part1/lab-setup.jpg){: .rounded-10 .shadow .w-100 }
+*Physical bare-metal lab used for safe detonation of 600+ samples*
 
-“When they spotted it they didn't execute and I had to do some analysis… I had to run in the physical desktop environment.”
-Lesson for analysts: cloud-hosted sandboxes and default VM configurations are increasingly blind spots.
-Key Finding #2 – Spyware & Credential Theft Happens First
-Modern ransomware almost always contains a full stealer component that runs before or in parallel with encryption.
-Common stolen items:
+### 1. Anti-Analysis & Environment Awareness (They Know You’re Watching)
 
-SAM / SYSTEM / SECURITY registry hives → local account password hashes
-Browser credentials (Chrome, Edge, Firefox via DPAPI or direct SQLite access)
-Desktop screenshots (including current wallpaper — likely for victim identification)
-Real-time keylogger
-Clipboard content (crypto addresses, etc.)
+A surprising number of families include sophisticated checks to detect virtual machines, sandboxes, or cloud instances.
 
-Exfiltration methods observed:
+**Key findings:**
 
-Telegram bots — by far the most common and easiest to implement
-Custom C2 HTTP/HTTPS POSTs
-Occasionally Discord webhooks
+- **BlackCat (ALPHV)** and **Ragnar Locker** were the most aggressive against VirtualBox. They inspected registry keys (e.g., `HKLM\SOFTWARE\Oracle\VirtualBox Guest Additions`), running processes (`vboxsvc.exe`, `VBoxTray.exe`), MAC address OUIs, CPUID leaf values, and hardware artifacts.
+- **Four samples** specifically detected cloud environments (AWS, Azure, GCP). Detection methods included querying instance metadata endpoints (`169.254.169.254`) and checking for cloud-specific drivers or processes.
+- **Behavior on detection:** These samples **refused to execute entirely** — no encryption, no ransom note, no artifacts left behind. I had to migrate analysis to bare-metal physical desktops to continue.
 
-Exfil often occurs quietly and can be delayed until user activity is detected (mouse/keyboard events), reducing sandbox hits.
-This enables classic double extortion (encrypt + data leak threat) or even triple extortion (DDoS threat on top).
-Key Finding #3 – Screen Takeover & Psychological Warfare
-Several families go far beyond file locking — they actively terrorize the user.
-Observed behaviors:
+**Defender takeaway:** If your sandbox or analysis environment is cloud-hosted or uses common VM fingerprints, you are effectively blind to a non-trivial percentage of modern ransomware.
 
-Full-screen black overlay displaying Bitcoin / Monero wallet address
-Playback of looping meme videos or corrupt hard disk grinding sounds (the classic failing HDD noise)
-Complete desktop freeze: Explorer.exe killed or hooked, taskbar/input disabled
-Interference with File Explorer and Notepad (prevent opening or viewing files)
-Wallpaper replacement (sometimes with taunting images/text)
+![Anti-Analysis & VM Detection Techniques](/assets/img/posts/ransomware-part1/vm-detection.jpg){: .rounded-10 .shadow .w-100 }
+*Advanced anti-VM and sandbox-evasion logic found in BlackCat and Ragnar Locker*
 
-Families most aggressive here:
+### 2. Espionage & Data Exfiltration (Spyware First, Encryption Second)
 
-Medusa
-RA World
+Almost every major family now includes a full stealer component **before** encryption begins.
 
-One particularly nasty Medusa sample abused bcdedit to:
+**Observed capabilities:**
 
-Disable Safe Mode (bcdedit /set {default} safeboot Minimal → later removed)
-Disable automatic recovery
-Delete shadow copies (vssadmin delete shadows /all /quiet)
+- Dumping the SAM/SYSTEM/SECURITY registry hives for local account credentials
+- Harvesting browser-stored passwords (Chrome, Edge, Firefox) via DPAPI or direct SQLite extraction
+- Capturing desktop screenshots (including wallpaper for victim identification/proof)
+- Installing a keylogger to capture typed credentials in real time
+- Exfiltrating all stolen data via **Telegram bots** (the most common channel) or custom C2 infrastructure
 
-Result: system became effectively unrecoverable without full OS reinstall.
-I personally had to wipe and reinstall the test machine from scratch.
-“It showed a black screen with wallet address… showed a video type… looping video with the corrupt disk sound… effected the boot loader and I had to install a new OS.”
-This crosses from malware into psychological operations.
-Key Finding #4 – Dropper & Anti-Forensic Techniques
-Multiple families used multistage / self-preserving behaviors:
+Exfiltration happened quietly and often in parallel with other activities. Several samples waited for user interaction (mouse/keyboard activity) before sending data, reducing the chance of detection during idle sandbox runs.
 
-Self-replacing executable:
-Drop new binary in temp / appdata / programdata
-Delete original file
-Execute the new copy
-(RA World and similar multistage families were frequent offenders)
+**Why this matters:** This is classic double (or triple) extortion — steal data → threaten to leak → encrypt → demand payment. Defenders who only watch for file-encryption patterns miss the entire first half of the attack.
 
-Creation of multiple identical copies across different directories
-Repeated environment (VM/cloud) checks even after initial execution
-Registry / service persistence for reboot survival
-Wallpaper changes, desktop icon manipulation
+![Ransomware Data Exfiltration Flow](/assets/img/posts/ransomware-part1/data-exfil.jpg){: .rounded-10 .shadow .w-100 }
+*Typical pre-encryption espionage pipeline (credentials → screenshots → Telegram C2)*
 
-These techniques significantly raise the bar for both AV/EDR detection and incident response cleanup.
-The Single Most Important Lesson
-After touching 600+ samples, the reality is clear:
-“Ransomware doesn’t only encrypt files — it corrupts some boot loader, makes copies of the file, communicates with the C2 and also implant keystrokes, changes wallpaper, steals creds, and many other [behaviors] as mentioned earlier.”
-Encryption is now the last visible stage of a much longer, multi-purpose infection chain.
-Most detection strategies still over-focus on file-encryption patterns and ransom notes.
-The real compromise happens in the stealthy prelude: credential theft, C2 communication, boot configuration sabotage, screen control.
-Coming in Part 2
-I will publish the second part soon:
-How I built my own custom ransomware PoC and which specific evasion techniques successfully bypassed multiple commercial EDR / AV / XDR products during testing.
-Stay tuned.
+### 3. Screen Hijacking & Psychological Operations
 
-Questions for readers
-Feel free to comment below:
+Several families went beyond encryption and took complete control of the user experience.
 
-Which ransomware family currently worries you the most?
-Have you ever seen ransomware play meme videos or fake disk failure sounds during infection?
-Blue-team perspective: what’s the single detection rule / behavior you wish vendors prioritized more (bcdedit abuse, Telegram exfil, self-replacing binaries, etc.)?
+**Observed techniques:**
 
-Thanks for reading — stay safe out there.
+- Full-screen black overlay with embedded ransom wallet address
+- Playback of **meme videos** or **looping corrupt-disk sounds** (the classic grinding HDD failure noise) over the ransom screen
+- Complete disabling of user interaction — nothing clickable, Explorer.exe killed or hooked, desktop frozen
+- Targeted interference with File Explorer and Notepad (preventing opening or viewing of any text files)
+
+**Families most aggressive here:** Medusa and RA World stood out.
+
+One sample (Medusa lineage) went even further by modifying the Windows Boot Configuration Data (BCD) via `bcdedit` commands — disabling Safe Mode, recovery options, and shadow copy services. The result? The machine became unbootable after encryption, forcing a complete OS reinstall. I personally had to wipe and reinstall the test system.
+
+This isn’t just ransomware. This is **digital terrorism** designed to maximize panic and pressure.
+
+![Screen Hijacking Ransom Overlay](/assets/img/posts/ransomware-part1/ransom-screen.jpg){: .rounded-10 .shadow .w-100 }
+*Full-screen psychological warfare overlay used by aggressive families (Medusa/RA World)*
+
+### 4. Self-Replication, Persistence & Dropper Tactics
+
+Multiple families employed advanced dropper and anti-forensic techniques:
+
+- **Self-replacing binaries:** Drop a new executable in a different location → delete the original → execute the new copy (observed in several multistage families, especially RA World).
+- Creation of multiple identical copies across system directories to survive partial detection.
+- VM/cloud re-checking even after initial execution.
+- Modification of system components (wallpaper changes, registry persistence, service creation).
+
+These tactics dramatically increase the difficulty of both automated detection and manual cleanup.
+
+### 5. The Single Biggest Lesson After 600 Samples
+
+Ransomware in 2026 is no longer a simple encryptor.
+
+> “Ransomware doesn’t only encrypt files — it corrupts bootloaders, creates file copies for persistence, communicates with C2 servers, implants keystroke loggers, changes wallpapers, steals credentials, hijacks the entire screen, and deploys psychological warfare tactics.”
+
+The encryption step is now just the **final visible stage** of a much larger, multi-purpose infection chain.
+
+Most organizations and even many security products still focus almost exclusively on file-encryption signatures and ransom-note detection. That approach is dangerously outdated.
+
+### Coming in Part 2
+
+I will walk through the custom ransomware I developed during this research — including the exact evasion techniques that successfully bypassed multiple commercial EDR/AV/XDR solutions — and what real-world lessons I learned about modern detection gaps.
+
+**Stay tuned.**
+
+---
