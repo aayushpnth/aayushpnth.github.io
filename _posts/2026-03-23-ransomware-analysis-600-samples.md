@@ -9,10 +9,10 @@ image:
   alt: Dark cybersecurity ransomware analysis lab with encrypted files and threat intelligence overlays
 ---
 
-![Ransomware Header Image](/assets/img/posts/ransomware-part1/header.jpg){: .rounded-10 .shadow .w-100 }
+![Ransomware Header Image](/assets/img/ransonware.jpeg){: .rounded-10 .shadow .w-100 }
 *Modern ransomware is far more than just an encryptor — it’s a full-spectrum attack platform.*
 
-**Author:** [Your Name / Alias]  
+**Author:** [Aayush Pantha / lucy01]  
 **Role:** Cybersecurity Researcher & Red Team Operator  
 **Date:** March 2026  
 
@@ -35,7 +35,7 @@ This is **Part 1** of a two-part series. Here I detail the unexpected behaviors 
 
 All samples were detonated in a controlled lab with proper containment. No production systems were harmed.
 
-![Malware Analysis Lab Setup](/assets/img/posts/ransomware-part1/lab-setup.jpg){: .rounded-10 .shadow .w-100 }
+![Malware Analysis Lab Setup](/assets/img/lab.jpeg){: .rounded-10 .shadow .w-100 }
 *Physical bare-metal lab used for safe detonation of 600+ samples*
 
 ### 1. Anti-Analysis & Environment Awareness (They Know You’re Watching)
@@ -49,9 +49,6 @@ A surprising number of families include sophisticated checks to detect virtual m
 - **Behavior on detection:** These samples **refused to execute entirely** — no encryption, no ransom note, no artifacts left behind. I had to migrate analysis to bare-metal physical desktops to continue.
 
 **Defender takeaway:** If your sandbox or analysis environment is cloud-hosted or uses common VM fingerprints, you are effectively blind to a non-trivial percentage of modern ransomware.
-
-![Anti-Analysis & VM Detection Techniques](/assets/img/posts/ransomware-part1/vm-detection.jpg){: .rounded-10 .shadow .w-100 }
-*Advanced anti-VM and sandbox-evasion logic found in BlackCat and Ragnar Locker*
 
 ### 2. Espionage & Data Exfiltration (Spyware First, Encryption Second)
 
@@ -69,7 +66,7 @@ Exfiltration happened quietly and often in parallel with other activities. Sever
 
 **Why this matters:** This is classic double (or triple) extortion — steal data → threaten to leak → encrypt → demand payment. Defenders who only watch for file-encryption patterns miss the entire first half of the attack.
 
-![Ransomware Data Exfiltration Flow](/assets/img/posts/ransomware-part1/data-exfil.jpg){: .rounded-10 .shadow .w-100 }
+![Ransomware Data Exfiltration Flow](/assets/img/Data-Exfiltration.jpeg){: .rounded-10 .shadow .w-100 }
 *Typical pre-encryption espionage pipeline (credentials → screenshots → Telegram C2)*
 
 ### 3. Screen Hijacking & Psychological Operations
@@ -89,7 +86,7 @@ One sample (Medusa lineage) went even further by modifying the Windows Boot Conf
 
 This isn’t just ransomware. This is **digital terrorism** designed to maximize panic and pressure.
 
-![Screen Hijacking Ransom Overlay](/assets/img/posts/ransomware-part1/ransom-screen.jpg){: .rounded-10 .shadow .w-100 }
+![Screen Hijacking Ransom Overlay](/assets/img/UNREN.png){: .rounded-10 .shadow .w-100 }
 *Full-screen psychological warfare overlay used by aggressive families (Medusa/RA World)*
 
 ### 4. Self-Replication, Persistence & Dropper Tactics
