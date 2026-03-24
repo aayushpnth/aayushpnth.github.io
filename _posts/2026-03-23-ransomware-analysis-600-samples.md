@@ -5,7 +5,7 @@ categories: [Cybersecurity, Malware-Analysis, Red-Teaming]
 tags: [ransomware, EDR, endpoint-protection, malware-analysis, threat-research, anti-analysis, data-exfiltration]
 toc: true
 image:
-  path: /assets/img/posts/ransomware-part1/header.jpg
+  path: /assets/img/ransomware.jpeg
   alt: Dark cybersecurity ransomware analysis lab with encrypted files and threat intelligence overlays
 ---
 
@@ -87,7 +87,7 @@ One sample (Medusa lineage) went even further by modifying the Windows Boot Conf
 This isn’t just ransomware. This is **digital terrorism** designed to maximize panic and pressure.
 
 ![Screen Hijacking Ransom Overlay](/assets/img/UNREN.png){: .rounded-10 .shadow .w-100 }
-*Full-screen psychological warfare overlay used by aggressive families (Medusa/RA World)*
+*Full-screen psychological warfare overlay used by aggressive families (Medusa)*
 
 ### 4. Self-Replication, Persistence & Dropper Tactics
 
