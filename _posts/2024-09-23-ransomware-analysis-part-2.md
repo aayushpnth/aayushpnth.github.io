@@ -1,6 +1,6 @@
 ---
 title: "Ransomware Analysis Part 2: Custom Lab Sample Deep-Dive"
-date: 2024-09-23 10:30:00 +0545
+date: 2026-09-23 10:30:00 +0545
 categories: [Security Research, Malware Analysis]
 tags: [ransomware, api-monitor, process-monitor, chacha20, encryption, malware, security]
 author: lucy01
@@ -9,11 +9,11 @@ image:
   alt: "Ransomware Analysis Part 2"
 ---
 
-In **Part 1**, we analyzed 500 real-world ransomware samples and discovered consistent attack patterns. But understanding binaries tells only half the story. To really know what ransomware does, we need to see it in action—at the Windows API level. For this lab i have created an simple ransomware using python and then compiled it to see how ransomware works and calls windows api.
+In **Part 1**, we analyzed 600+ real-world ransomware samples and discovered consistent attack patterns. But understanding binaries tells only half the story. To really know what ransomware does, we need to see it in action—at the Windows API level. For this lab i created a simple ransomware using python and then compiled it to see how ransomware works and calls windows api.
 
 That's exactly what we're doing here. We built a lab, created a custom ransomware sample using ChaCha20-Poly1305 encryption, compiled it with PyInstaller, and monitored every single Windows API call using **API Monitor** and **Process Monitor**.
 
-What we found? The attack is stunning in its simplicity and devastating in its speed. Watch this: ransomware encrypts 50+ files in under 10 seconds. By the time you notice something's wrong, your data is already unrecoverable.
+What we found? The attack is stunning in its simplicity and devastating in its speed. Watch this: ransomware encrypts dozens of files in seconds. By the time you notice something's wrong, your data is already unrecoverable.
 
 Let's walk through exactly what happens, why defenders miss it, and how to catch it.
 
@@ -116,15 +116,17 @@ This is the **critical encryption sequence**. Let's break down what happens at t
 - **Result:** Entire file loaded into RAM
 
 **Step 2: Generate Nonce**
-- **Windows API:** `CryptGenRandom()`
-- **DLL:** bcrypt.dll or advapi32.dll (Windows Cryptography)
-- **Why different nonce per file?** Reusing a nonce breaks stream cipher security completely. Every file gets a unique random 12-byte value.
+
+* **Python:** `secrets.token_bytes(12)`
+* **Underlying Windows API (typical):** CryptGenRandom() / BCryptGenRandom() via the OS CSPRNG
+* **Why different nonce per file?** Reusing a nonce breaks stream cipher security. Every file gets a unique 12-byte value.
 
 **Step 3: Encrypt (THE CRITICAL MOMENT)**
-- **Algorithm:** ChaCha20-Poly1305 (AEAD cipher)
-- **Windows API:** `BCryptEncrypt()`
-- **DLL:** bcrypt.dll (Windows CNG – Cryptography Next Generation)
-- **Result:** Plaintext becomes unrecoverable ciphertext (256-bit keyspace = 2^256 possibilities)
+
+* **Algorithm:** ChaCha20-Poly1305 (AEAD cipher) via the Python `cryptography` library
+* **Backend:** OpenSSL (default backend used by the cryptography package on Windows)
+* **Note:** This does **not** call Windows CNG `BCryptEncrypt()`. The encryption happens inside the OpenSSL backend bundled with the library.
+* **Result:** Plaintext becomes unrecoverable ciphertext (256-bit keyspace)
 
 **Step 4: Write**
 - **Windows API:** `CreateFileW()` with GENERIC_WRITE, then `WriteFile()`
@@ -152,7 +154,7 @@ When ransomware.exe starts, Python runtime loads and all imported modules are ma
 **What You're Seeing (Annotated):**
 
 **Left Side: Module List**
-Every DLL that gets loaded is listed here. Notice: kernel32.dll (file I/O), bcrypt.dll (cryptography), msvcrt.dll (C runtime), python*.dll (Python runtime)
+Every DLL that gets loaded is listed here. Notice: kernel32.dll (file I/O), bcrypt.dll (CSPRNG / random generation), msvcrt.dll (C runtime), python*.dll (Python runtime)
 
 **Right Side: API Calls**
 - `InitializeCriticalSectionEx` – Thread-safe operations for crypto
@@ -165,7 +167,7 @@ Every DLL that gets loaded is listed here. Notice: kernel32.dll (file I/O), bcry
 ### Screenshot 2: The Encryption Loop (The Attack)
 
 ![API Monitor Encryption Loop](/assets/img/screenshot2-encryption-core.png)
-*API Monitor - Encryption Core: Dense timestamps show rapid-fire encryption. Row 877 is BCryptEncrypt()  where plaintext becomes ciphertext.*
+*API Monitor - Encryption Core: Dense timestamps show rapid-fire encryption. Row 877 shows a crypto-related call during the encryption loop (the exact moment plaintext becomes ciphertext).*
 
 This is where the action happens. The ransomware is actively encrypting files, and API Monitor is capturing every single cryptographic operation. Look at those timestamps everything is happening within the same microsecond.
 
@@ -173,7 +175,7 @@ This is where the action happens. The ransomware is actively encrypting files, a
 Notice that almost every row has the identical timestamp. This isn't a coincidence it's how fast the process is moving. Multiple API calls happening within microseconds means **files are being processed rapidly** (probably 5-10 files per second).
 
 **Row 877: The Critical Crypto Call**
-This is `BCryptEncrypt()` the exact moment plaintext becomes ciphertext.
+This is a crypto-related call during the encryption loop the exact moment plaintext becomes ciphertext (handled by the OpenSSL backend of the cryptography library).
 
 **Memory Operations**
 You see repeated calls to: `GetProcessHeap()`, `HeapAlloc()`, `RtlAllocateHeap()`. Why? Because Python loads entire files into RAM before encrypting them. Large files = large memory allocations = visible memory spike.
@@ -211,7 +213,8 @@ When the ransomware runs, it triggers a cascade of Windows API calls across mult
 |-----|---------|----------------|----------|
 | **kernel32.dll** | File I/O & process management | CreateFileW, ReadFile, WriteFile, DeleteFileW, CloseHandle | Screenshot 3 (File ops visible) |
 | **ntdll.dll** | Low-level syscall interface | NtCreateFile, NtReadFile, NtWriteFile | Implicit (kernel32 calls these) |
-| **bcrypt.dll** | Windows crypto (CNG) | BCryptEncrypt, BCryptGenRandom | Screenshot 2 (Row 877 & crypto ops) |
+| **bcrypt.dll** / advapi32.dll | Windows CSPRNG | BCryptGenRandom / CryptGenRandom (used for key & nonce generation) | Observed during random generation |
+| **OpenSSL (via cryptography lib)** | Actual encryption | ChaCha20-Poly1305 implementation | Encryption core |
 | **msvcrt.dll** | C runtime library | malloc, memcpy, free | Screenshot 1 (Module list) |
 | **python*.dll** | Python runtime (PyInstaller) | All Python functions | Screenshot 1 (Module list) |
 
@@ -236,10 +239,9 @@ ntdll.dll: NtReadFile() [syscall]
     ↓
 Python: chacha.encrypt(nonce, plaintext)
     ↓
-bcrypt.dll: BCryptEncrypt()
+OpenSSL backend (cryptography library)
     ↓
-[Crypto operation in Windows CNG]
-
+ChaCha20-Poly1305 encryption
     ↓
 Python: open(encrypted_path, "wb")
     ↓
@@ -285,7 +287,7 @@ Based on what we've observed, here's what every EDR (Endpoint Detection & Respon
 **Rule: Suspicious_Crypto_Operations**
 
 **Conditions:**
-- Non-standard application calling bcrypt.dll crypto functions
+- Non-standard / unsigned process performing rapid cryptographic operations (OpenSSL backend or Windows CNG)
 - AND repeated calls (>10 per second)
 - AND combined with file read/write operations
 - AND no code signing from reputable vendor
@@ -297,7 +299,7 @@ Based on what we've observed, here's what every EDR (Endpoint Detection & Respon
 **Rule: Rapid_Memory_Allocation_With_Crypto**
 
 **Conditions:**
-- HeapAlloc/VirtualAlloc spike followed by BCryptEncrypt calls
+- HeapAlloc/VirtualAlloc spike followed by rapid cryptographic operations
 - Pattern repeats 50+ times in <60 seconds
 - Process is unsigned executable from user folder
 
@@ -339,7 +341,7 @@ Based on what we've observed, here's what every EDR (Endpoint Detection & Respon
 ### Key Takeaways
 
 1. **Ransomware is algorithmic, not sophisticated** – The techniques are well-known and repeatable
-2. **Speed is the attacker's advantage** – 50+ files encrypted per second means detection must be automated
+2. **Speed is the attacker's advantage** – dozens of files can be encrypted in seconds detection must be automated
 3. **API calls tell the complete story** – Monitor Windows APIs to see attacks before users do
 4. **DLL dependencies are fingerprints** – Python bundled in .exe + crypto libraries + rapid file ops = unmistakable signature
 5. **Wallpaper changes signal desperation** – When ransomware displays ransom notes, key exfiltration has already happened
