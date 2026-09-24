@@ -197,6 +197,12 @@ This is what users would see if they opened Process Monitor and looked at the fi
 
 **All of this happens within 100 milliseconds.** By the time you notice one file is missing, ransomware has already encrypted 50+ others.
 
+### Screenshot 4: Ransomware Execution (The Evidence)
+![Ransomware execution](/assets/img/encryption.png)
+*Real-World Impact: Command prompt executing ransomware + File*
+
+This is where we see the malware in action. The second I ran ransom.exe, it tore through the directory, locking down 9 files in a matter of seconds. Every targeted file was instantly slapped with the .cha20lock extension, and a text file dropped right into the folder a classic ransom note complete with a Bitcoin wallet address and contact email.
+
 ## DLL Analysis: What Gets Called
 
 When the ransomware runs, it triggers a cascade of Windows API calls across multiple DLLs:
